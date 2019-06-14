@@ -324,6 +324,22 @@ namespace ClassLibrary1
             }
         }
 
+        public bool TempTest()
+        {
+            try
+            {
+                
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+
+
         #region 通用
         /// <summary>
         /// 執行成功訊息
