@@ -126,7 +126,7 @@ namespace UnitTestProject1
                                 stop = TestTool.AssertAreEqualByXPathValue(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
                             case "TempTest":
-                                stop = TestTool.TempTest();
+                                stop = TestTool.TempTest(driver, item2.Inivalue[0]);
                                 break;
                             default:
                                 TestTool.writeLog("error", item2.IniName + "：不存在!!");

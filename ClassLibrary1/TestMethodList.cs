@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium.Support.UI;
+using System.Text.RegularExpressions;
 
 namespace ClassLibrary1
 {
@@ -324,11 +325,17 @@ namespace ClassLibrary1
             }
         }
 
-        public bool TempTest()
+        public bool TempTest(IWebDriver driver, string data)
         {
             try
             {
-                
+                data = data.Replace("{", "");
+                data = data.Substring(0, data.Length - 1);
+                List<string> list = new List<string>(data.Split('}'));
+                foreach (string t in list)
+                {
+                    writeLog("Info ", t);
+                }
                 passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
                 return true;
             }
@@ -406,6 +413,5 @@ namespace ClassLibrary1
             sw.Close();
         }
         #endregion
-
     }
 }
