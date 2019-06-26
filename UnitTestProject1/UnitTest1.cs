@@ -72,12 +72,12 @@ namespace UnitTestProject1
             {
                 foreach (var item in IniData)
                 {
-                    TestTool.writeLog("Trace", "----------------------------------------------------------------------------------------");
                     TestTool.writeLog("Trace", "----測試開始----" + item.IniType);
                    
                     foreach (var item2 in item.IniDetail)
                     {
                         funName = item2.IniName;
+
                         switch (item2.IniName)
                         {
                             case "GoToUrl":
@@ -104,11 +104,17 @@ namespace UnitTestProject1
                             case "DropdownSelectTextFindElementByXPath":
                                 stop = TestTool.DropdownSelectTextFindElementByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
+                            case "DropdownSelectTextEveryoneInputFindElementByXPath":
+                                stop = TestTool.DropdownSelectTextEveryoneInputFindElementByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
                             case "SendKeysFindElementByName":
                                 stop = TestTool.SendKeysFindElementByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
                             case "SendKeysFindElementByXPath":
                                 stop = TestTool.SendKeysFindElementByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "SearchTextGetEndandclicknextpage":
+                                stop = TestTool.SearchTextGetEndandclicknextpage(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
                             case "WindowScroll":
                                 stop = TestTool.WindowScroll(driver, item2.Inivalue[0]);
@@ -125,9 +131,12 @@ namespace UnitTestProject1
                             case "AssertAreEqualByXPathValue":
                                 stop = TestTool.AssertAreEqualByXPathValue(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
-                            case "TempTest":
-                                stop = TestTool.TempTest(driver, item2.Inivalue[0]);
+                            case "CheckSelectListValuetFindElementByClassName":
+                                stop = TestTool.CheckSelectListValuetFindElementByClassName(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
+                            //case "TempTest":
+                            //    stop = TestTool.TempTest(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                            //    break;
                             default:
                                 TestTool.writeLog("error", item2.IniName + "：不存在!!");
                                 break;
@@ -159,4 +168,6 @@ namespace UnitTestProject1
         }
         
     }
+
+
 }

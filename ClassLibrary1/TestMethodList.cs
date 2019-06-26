@@ -11,6 +11,7 @@ using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium.Support.UI;
 using System.Text.RegularExpressions;
+using System.Collections.ObjectModel;
 
 namespace ClassLibrary1
 {
@@ -174,6 +175,33 @@ namespace ClassLibrary1
             }
         }
         /// <summary>
+        /// 使用捲軸找到符合的文字，當找不到時會點擊下一頁的XPath
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="XPath"></param>
+        /// <param name="ClickXPath"></param>
+        /// <returns></returns>
+        public bool SearchTextGetEndandclicknextpage(IWebDriver driver, string XPath, string ClickXPath)
+        {
+            try
+            {
+                //使用滾動捲軸找到符合文字
+                while (!ReelScroll(driver, XPath))
+                {
+                    //點擊下一頁
+                    driver.FindElement(By.XPath(ClickXPath)).Click();
+                }
+
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        /// <summary>
         /// 找到元素XPath再使用捲軸拖拉過去
         /// </summary>
         /// <param name="driver"></param>
@@ -183,13 +211,17 @@ namespace ClassLibrary1
         {
             try
             {
-                IWebElement eles = driver.FindElement(By.XPath(XPath));
-                int elesPostionX = eles.Location.X;
-                int elesPostionY = eles.Location.Y;
-                string js = "window.scroll(" + elesPostionX + "," + elesPostionY + ")";
-                ((IJavaScriptExecutor)driver).ExecuteScript(js);
-                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
-                return true;
+                bool result = ReelScroll(driver, XPath);
+                if (result)
+                {
+                    passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                    return true;
+                }
+                else
+                {
+                    errorMessage("未找到資料", System.Reflection.MethodBase.GetCurrentMethod().Name);
+                    return false;
+                }
             }
             catch (Exception ex)
             {
@@ -324,19 +356,42 @@ namespace ClassLibrary1
                 return false;
             }
         }
-
-        public bool TempTest(IWebDriver driver, string data)
+        /// <summary>
+        /// 可以根據輸入的值選擇下拉式選單，和並檢查輸入值與下拉式選單值不同資料
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="XPath"></param>
+        /// <param name="ListSelectText"></param>
+        /// <returns></returns>
+        public bool DropdownSelectTextEveryoneInputFindElementByXPath(IWebDriver driver, string XPath, string ListSelectText)
         {
             try
             {
-                data = data.Replace("{", "");
-                data = data.Substring(0, data.Length - 1);
-                List<string> list = new List<string>(data.Split('}'));
-                foreach (string t in list)
+                List<string> optionsSelectList = SplitBigScratch(ListSelectText);
+                IWebElement selectElem = driver.FindElement(By.XPath(XPath));
+                IList<IWebElement> options = selectElem.FindElements(By.TagName("option"));
+                int NoExistCount = 0;
+                for (int i = 0; i < options.Count; i++)
                 {
-                    writeLog("Info ", t);
+                    if (optionsSelectList.Contains(options[i].Text))
+                    {
+                        options[i].Click();
+                    }
+                    else
+                    {
+                        writeLog("Info ", "不存在：" + options[i].Text);
+                        Trace.WriteLine("不存在：" + options[i].Text);
+                        NoExistCount++;
+                    }
                 }
-                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                if (NoExistCount==0)
+                {
+                    passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                }
+                else
+                {
+                    errorMessage("選項不存在", System.Reflection.MethodBase.GetCurrentMethod().Name);
+                }
                 return true;
             }
             catch (Exception ex)
@@ -345,6 +400,62 @@ namespace ClassLibrary1
                 return false;
             }
         }
+        /// <summary>
+        /// 檢查select選擇了那些值
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="ClassName"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public bool CheckSelectListValuetFindElementByClassName(IWebDriver driver, string ClassName, string ListData)
+        {
+            try
+            {
+                List<string> expected = SplitBigScratch(ListData);
+
+                IList<IWebElement> StatusSelectList = driver.FindElements(By.ClassName(ClassName));
+                int NoExistCount = 0;
+                foreach (var item in StatusSelectList)
+                {
+                    if (!expected.Contains(item.GetAttribute("title")))
+                    {
+                        writeLog("Info ", "不存在：" + item.GetAttribute("title"));
+                        Trace.WriteLine("不存在：" + item.GetAttribute("title"));
+                        NoExistCount++;
+                    }
+                }
+                Assert.AreEqual(0, NoExistCount);
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+            //public bool TempTest(IWebDriver driver, string data, string XPath)
+            //{
+            //    try
+            //    {
+            //        data = data.Replace("{", "");
+            //        data = data.Substring(0, data.Length - 1);
+            //        List<string> list = new List<string>(data.Split('}'));
+            //        foreach (string t in list)
+            //        {
+            //            writeLog("Info ", t);
+            //        }
+            //        writeLog("Info ", XPath);
+            //        passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+            //        return true;
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+            //        return false;
+            //    }
+        }
+
+        
 
 
         #region 通用
@@ -372,6 +483,15 @@ namespace ClassLibrary1
             Trace.WriteLine("Fail：" + functionName);
             writeLog("Error", ex);
             Trace.WriteLine(ex);
+            return false;
+        }
+        public bool errorMessage(string errorMessage, string functionName)
+        {
+            //取函式名稱
+            writeLog("Error", "Fail：" + functionName);
+            Trace.WriteLine("Fail：" + functionName);
+            writeLog("Error", errorMessage);
+            Trace.WriteLine(errorMessage);
             return false;
         }
 
@@ -411,6 +531,41 @@ namespace ClassLibrary1
             sw.WriteLine(DateTime.Now + " | " + title + " | " + message);
             sw.Flush();
             sw.Close();
+        }
+        /// <summary>
+        /// 去除大括號
+        /// </summary>
+        /// <param name="ListData"></param>
+        /// <returns></returns>
+        private static List<string> SplitBigScratch(string ListData)
+        {
+            ListData = ListData.Replace("{", "");
+            ListData = ListData.Substring(0, ListData.Length - 1);
+            List<string> expected = new List<string>(ListData.Split('}'));
+            return expected;
+        }
+        /// <summary>
+        /// 滾動捲軸
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="XPath"></param>
+        private bool ReelScroll(IWebDriver driver, string XPath)
+        {
+            try
+            {
+                IWebElement eles = driver.FindElement(By.XPath(XPath));
+                int elesPostionX = eles.Location.X;
+                int elesPostionY = eles.Location.Y;
+                string js = "window.scroll(" + elesPostionX + "," + elesPostionY + ")";
+                ((IJavaScriptExecutor)driver).ExecuteScript(js);
+               return true;
+            }
+            catch (Exception)
+            {
+
+                return false;
+            }
+            
         }
         #endregion
     }
