@@ -16,17 +16,19 @@ namespace UnitTestProject1
     {
         //初始設定
         private static IWebDriver driver;
+        private static ChromeOptions options;
         private StringBuilder verificationErrors;
         private bool acceptNextAlert = true;
 
         //ClassTEST執行前必執行程序
-        [ClassInitialize]
-        public static void InitializeClass(TestContext testContext)
+        public static void InitializeClass()
         {
-            //Chrom設定
-            ChromeOptions options = new ChromeOptions();
+            //Chrome設定
+            options = new ChromeOptions();
             //download.default_directory 預設下載會存在C:\temp\excel
             options.AddUserProfilePreference("download.default_directory", @"C:\temp\excel");
+            //設定Chrome使用者設定資料目錄
+            //options.AddArgument(@"user-data-dir=C:\selenum\AutomationProfile\");
             //自行設定路徑或直接從Nuget安裝
             driver = new ChromeDriver(@"C:\temp\driver", options);
             //瀏覽器最大化
@@ -35,7 +37,6 @@ namespace UnitTestProject1
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
         }
         //ClassTEST執行完最後再執行
-        [ClassCleanup]
         public static void CleanupClass()
         {
             try
@@ -49,22 +50,27 @@ namespace UnitTestProject1
                 // Ignore errors if unable to close the browser
             }
         }
-        //TestTestMethod前執行的程序
-        [TestInitialize]
-        public void InitializeTest()
-        {
-            verificationErrors = new StringBuilder();
-        }
-        //TestTestMethod後執行的程序
-        [TestCleanup]
-        public void CleanupTest()
-        {
-            Assert.AreEqual("", verificationErrors.ToString());
-        }
+        
 
         //TestMethod測試內容
         [TestMethod]
         public void T1()
+        {
+
+            // 取得資料夾內所有檔案
+            foreach (string fname in System.IO.Directory.GetFileSystemEntries(@"C:\temp\log\", "TEST*.ini"))
+            {
+                TestTool.writeLog("Trace", "----開始讀取----" + Path.GetFileName(fname));
+                List<IniModel>  IniData = ReadAllData(fname);
+                if (IniData.Count>0)
+                {
+                    InitializeClass();
+                    TestFunction(IniData);
+                }
+            }
+        }
+
+        private static void TestFunction(List<IniModel> IniData)
         {
             var funName = "";
             bool stop = true;
@@ -73,66 +79,162 @@ namespace UnitTestProject1
                 foreach (var item in IniData)
                 {
                     TestTool.writeLog("Trace", "----測試開始----" + item.IniType);
-                   
+
                     foreach (var item2 in item.IniDetail)
                     {
                         funName = item2.IniName;
 
                         switch (item2.IniName)
                         {
+                            case "AssertAreEqual_DriverTitle":
+                                stop = TestTool.AssertAreEqual_DriverTitle(driver, item2.Inivalue[0]);
+                                break;
+                            case "AssertAreEqual_Text_ByXPath":
+                                stop = TestTool.AssertAreEqual_Text_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_Text_ById":
+                                stop = TestTool.AssertAreEqual_Text_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_Text_ByName":
+                                stop = TestTool.AssertAreEqual_Text_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_Text_ByTagName":
+                                stop = TestTool.AssertAreEqual_Text_ByTagName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_Text_ByClassName":
+                                stop = TestTool.AssertAreEqual_Text_ByClassName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_Value_ByXPath":
+                                stop = TestTool.AssertAreEqual_Value_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_Value_ById":
+                                stop = TestTool.AssertAreEqual_Value_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_Value_ByName":
+                                stop = TestTool.AssertAreEqual_Value_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_Value_ByTagName":
+                                stop = TestTool.AssertAreEqual_Value_ByTagName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_Value_ByClassName":
+                                stop = TestTool.AssertAreEqual_Value_ByClassName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_GetCssColor_ByXPath":
+                                stop = TestTool.AssertAreEqual_GetCssColor_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2]);
+                                break;
+                            case "AssertAreEqual_GetCssColor_ById":
+                                stop = TestTool.AssertAreEqual_GetCssColor_ById(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2]);
+                                break;
+                            case "AssertAreEqual_GetCssColor_ByName":
+                                stop = TestTool.AssertAreEqual_GetCssColor_ByName(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2]);
+                                break;
+                            case "AssertAreEqual_ElementExist_ByXPath":
+                                stop = TestTool.AssertAreEqual_ElementExist_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_ElementExist_ById":
+                                stop = TestTool.AssertAreEqual_ElementExist_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_ElementExist_ByName":
+                                stop = TestTool.AssertAreEqual_ElementExist_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_SelectListValuet_ByClassName":
+                                stop = TestTool.AssertAreEqual_SelectListValuet_ByClassName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_DropdownSelectValue_ByXPath":
+                                stop = TestTool.AssertAreEqual_DropdownSelectValue_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_DropdownSelectValue_ById":
+                                stop = TestTool.AssertAreEqual_DropdownSelectValue_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "AssertAreEqual_DropdownSelectValue_ByName":
+                                stop = TestTool.AssertAreEqual_DropdownSelectValue_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "ClickFindElement_ById":
+                                stop = TestTool.ClickFindElement_ById(driver, item2.Inivalue[0]);
+                                break;
+                            case "ClickFindElement_ByName":
+                                stop = TestTool.ClickFindElement_ByName(driver, item2.Inivalue[0]);
+                                break;
+                            case "ClickFindElement_ByXPath":
+                                stop = TestTool.ClickFindElement_ByXPath(driver, item2.Inivalue[0]);
+                                break;
+                            case "ClickFindElement_ByLinkText":
+                                stop = TestTool.ClickFindElement_ByLinkText(driver, item2.Inivalue[0]);
+                                break;
+                            case "ClickJSFindElement_ByXPath":
+                                stop = TestTool.ClickJSFindElement_ByXPath(driver, item2.Inivalue[0]);
+                                break;
+                            case "ClearFindElement_ByXPath":
+                                stop = TestTool.ClearFindElement_ByXPath(driver, item2.Inivalue[0]);
+                                break;
+                            case "ClearFindElement_ById":
+                                stop = TestTool.ClearFindElement_ById(driver, item2.Inivalue[0]);
+                                break;
+                            case "ClearFindElement_ByName":
+                                stop = TestTool.ClearFindElement_ByName(driver, item2.Inivalue[0]);
+                                break;
+                            case "Dropdown_SelectValue_ByXPath":
+                                stop = TestTool.Dropdown_SelectValue_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "Dropdown_SelectValue_ById":
+                                stop = TestTool.Dropdown_SelectValue_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "Dropdown_SelectValue_ByName":
+                                stop = TestTool.Dropdown_SelectValue_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "Dropdown_SelectText_ByXPath":
+                                stop = TestTool.Dropdown_SelectText_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "Dropdown_SelectText_ById":
+                                stop = TestTool.Dropdown_SelectText_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "Dropdown_SelectText_ByName":
+                                stop = TestTool.Dropdown_SelectText_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "Dropdown_SelectTextEveryoneInput_ByXPath":
+                                stop = TestTool.Dropdown_SelectTextEveryoneInput_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "Dropdown_SelectTextEveryoneInput_ById":
+                                stop = TestTool.Dropdown_SelectTextEveryoneInput_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "Dropdown_SelectTextEveryoneInput_ByName":
+                                stop = TestTool.Dropdown_SelectTextEveryoneInput_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "Driver_SwitchTo":
+                                stop = TestTool.Driver_SwitchTo(driver, item2.Inivalue[0]);
+                                break;
+                            case "Driver_Quit":
+                                stop = TestTool.Driver_Quit(driver);
+                                break;
+                            case "Driver_Close":
+                                stop = TestTool.Driver_Close(driver);
+                                break;
                             case "GoToUrl":
                                 stop = TestTool.GoToUrl(driver, item2.Inivalue[0]);
                                 break;
-                            case "ClickFindElementByName":
-                                stop = TestTool.ClickFindElementByName(driver, item2.Inivalue[0]);
+                            case "IJavaScriptExecutor_BrowserAddPaging":
+                                stop = TestTool.IJavaScriptExecutor_BrowserAddPaging(driver, item2.Inivalue[0]);
                                 break;
-                            case "ClickFindElementByXPath":
-                                stop = TestTool.ClickFindElementByXPath(driver, item2.Inivalue[0]);
+                            case "PullDownScroll_ByXPath":
+                                stop = TestTool.PullDownScroll_ByXPath(driver, item2.Inivalue[0]);
                                 break;
-                            case "ClickFindElementByLinkText":
-                                stop = TestTool.ClickFindElementByLinkText(driver, item2.Inivalue[0]);
+                            case "PullDownScroll_ByXPath_ClickNextPage":
+                                stop = TestTool.PullDownScroll_ByXPath_ClickNextPage(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
-                            case "ClickJSFindElementByXPath":
-                                stop = TestTool.ClickJSFindElementByXPath(driver, item2.Inivalue[0]);
+                            case "SendKeys_ByXPath":
+                                stop = TestTool.SendKeys_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
-                            case "ClearFindElementByXPath":
-                                stop = TestTool.ClearFindElementByXPath(driver, item2.Inivalue[0]);
+                            case "SendKeys_ById":
+                                stop = TestTool.SendKeys_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
-                            case "DropdownSelectValueFindElementByXPath":
-                                stop = TestTool.DropdownSelectValueFindElementByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "DropdownSelectTextFindElementByXPath":
-                                stop = TestTool.DropdownSelectTextFindElementByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "DropdownSelectTextEveryoneInputFindElementByXPath":
-                                stop = TestTool.DropdownSelectTextEveryoneInputFindElementByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "SendKeysFindElementByName":
-                                stop = TestTool.SendKeysFindElementByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "SendKeysFindElementByXPath":
-                                stop = TestTool.SendKeysFindElementByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "SearchTextGetEndandclicknextpage":
-                                stop = TestTool.SearchTextGetEndandclicknextpage(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "WindowScroll":
-                                stop = TestTool.WindowScroll(driver, item2.Inivalue[0]);
+                            case "SendKeys_ByName":
+                                stop = TestTool.SendKeys_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
                             case "ThreadSleep":
                                 stop = TestTool.ThreadSleep(driver, item2.Inivalue[0]);
                                 break;
-                            case "AssertAreEqualDriverTitle":
-                                stop = TestTool.AssertAreEqualDriverTitle(driver, item2.Inivalue[0]);
-                                break;
-                            case "AssertAreEqualByXPathText":
-                                stop = TestTool.AssertAreEqualByXPathText(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqualByXPathValue":
-                                stop = TestTool.AssertAreEqualByXPathValue(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "CheckSelectListValuetFindElementByClassName":
-                                stop = TestTool.CheckSelectListValuetFindElementByClassName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                            case "TestRememberMe":
+                                driver = TestTool.TestRememberMe(driver, item2.Inivalue[0]);
                                 break;
                             //case "TempTest":
                             //    stop = TestTool.TempTest(driver, item2.Inivalue[0], item2.Inivalue[1]);
@@ -164,9 +266,7 @@ namespace UnitTestProject1
                     Assert.IsFalse(true);
                 }
             }
-
         }
-        
     }
 
 

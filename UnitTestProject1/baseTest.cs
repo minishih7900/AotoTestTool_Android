@@ -17,7 +17,7 @@ namespace UnitTestProject1
 {
     public class baseTest
     {
-        public static List<IniModel> IniData = ReadAllData();
+        public static List<IniModel> IniData;
         public static TestMethodList TestTool = new TestMethodList();
         public static string FormatNum2 = "{0:0.00}";
         public static string FormatNum3 = "{0:0.000}";
@@ -44,16 +44,19 @@ namespace UnitTestProject1
             }
 
         }
-        public static List<IniModel> ReadAllData()
+        public static List<IniModel> ReadAllData(string path)
         {
-            StreamReader reader = new StreamReader(@"C:\temp\log\manager.ini",System.Text.Encoding.Default);
+            StreamReader reader = new StreamReader(path, System.Text.Encoding.UTF8);
             string[] content = reader.ReadToEnd().Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             reader.Close();
             List<IniModel> result = new List<IniModel>();
             int index = -1;
             foreach (string s in content)
             {
-                
+                if (s.StartsWith("//"))
+                {
+                    continue;
+                }
                 if (s.StartsWith("["))
                 {
                     result.Add(new IniModel() { IniType = s ,IniDetail = new List<Detail>() });
