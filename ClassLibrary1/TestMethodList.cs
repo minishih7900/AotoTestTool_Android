@@ -1233,8 +1233,8 @@ namespace ClassLibrary1
         {
             try
             {
-                string tempDate = "";
-                string LogMessage = "";
+                string tempDate = "" ;
+                string LogMessage = "" ;
                 //使用滾動捲軸找到符合文字
                 queryTableAndClickNextPage(driver, ClickXPath, CheckPageBody, XPath, ref tempDate, ref LogMessage);
                 if (LogMessage!="")
