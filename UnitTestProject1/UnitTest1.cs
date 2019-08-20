@@ -8,6 +8,9 @@ using System.Diagnostics;
 using ClassLibrary1;
 using System.IO;
 using UnitTestProject1.Model;
+using OpenQA.Selenium.Appium.Android;
+using OpenQA.Selenium.Appium.Enums;
+using OpenQA.Selenium.Remote;
 
 namespace UnitTestProject1
 {
@@ -17,24 +20,40 @@ namespace UnitTestProject1
         //初始設定
         private static IWebDriver driver;
         private static ChromeOptions options;
-        private StringBuilder verificationErrors;
-        private bool acceptNextAlert = true;
+        private static AndroidDriver<AndroidElement> androidDriver;
+        private static DesiredCapabilities Dcap;
+        private static string TestDriver;
 
         //ClassTEST執行前必執行程序
         public static void InitializeClass()
         {
-            //Chrome設定
-            options = new ChromeOptions();
-            //download.default_directory 預設下載會存在C:\temp\excel
-            options.AddUserProfilePreference("download.default_directory", @"C:\temp\excel");
-            //設定Chrome使用者設定資料目錄
-            //options.AddArgument(@"user-data-dir=C:\selenum\AutomationProfile\");
-            //自行設定路徑或直接從Nuget安裝
-            driver = new ChromeDriver(@"C:\temp\driver", options);
-            //瀏覽器最大化
-            driver.Manage().Window.Maximize();
-            //等待時間10秒
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            TestDriver = readIni("DefaultSet", "Driver");
+            if (TestDriver.ToLower() == "android")
+            {
+                Dcap = new DesiredCapabilities();
+                Dcap.SetCapability("platformName", readIni("AndroidSet", "platformName")); //手機系統
+                Dcap.SetCapability("platformVersion", readIni("AndroidSet", "platformVersion")); //手機系統版本
+                Dcap.SetCapability("deviceName", readIni("AndroidSet", "deviceName")); //手機或模擬器名稱
+                Dcap.SetCapability("appPackage", readIni("AndroidSet", "appPackage")); //apk包裝名稱
+                Dcap.SetCapability("appActivity", readIni("AndroidSet", "appActivity")); //app執行名稱
+                androidDriver = new AndroidDriver<AndroidElement>(new Uri(readIni("AndroidSet", "Uri")), Dcap);
+                
+               }
+            else
+            {
+                //Chrome設定
+                options = new ChromeOptions();
+                //download.default_directory 預設下載會存在C:\temp\excel
+                options.AddUserProfilePreference("download.default_directory", readIni("ChromeSet", "downloadDefaultDirectoryPath"));
+                //設定Chrome使用者設定資料目錄
+                //options.AddArgument(@"user-data-dir=C:\selenum\AutomationProfile\");
+                //自行設定路徑或直接從Nuget安裝
+                driver = new ChromeDriver(readIni("ChromeSet", "driverPath"), options);
+                //瀏覽器最大化
+                driver.Manage().Window.Maximize();
+                //等待10秒
+                driver.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(10));
+            }
         }
         //ClassTEST執行完最後再執行
         public static void CleanupClass()
@@ -56,7 +75,6 @@ namespace UnitTestProject1
         [TestMethod]
         public void T1()
         {
-
             // 取得資料夾內所有檔案
             foreach (string fname in System.IO.Directory.GetFileSystemEntries(@"C:\temp\log\", "TEST*.ini"))
             {
@@ -68,6 +86,7 @@ namespace UnitTestProject1
                     TestFunction(IniData);
                 }
             }
+            
         }
 
         private static void TestFunction(List<IniModel> IniData)
@@ -84,16 +103,31 @@ namespace UnitTestProject1
                     {
                         funName = item2.IniName;
 
+                        #region chrome
                         switch (item2.IniName)
                         {
                             case "AssertAreEqual_DriverTitle":
                                 stop = TestTool.AssertAreEqual_DriverTitle(driver, item2.Inivalue[0]);
                                 break;
                             case "AssertAreEqual_Text_ByXPath":
-                                stop = TestTool.AssertAreEqual_Text_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                if (TestDriver.ToLower() == "android")
+                                {
+                                    stop = TestTool.AssertAreEqual_Text_ByXPath(androidDriver, item2.Inivalue[0], item2.Inivalue[1]);
+                                }
+                                else
+                                {
+                                    stop = TestTool.AssertAreEqual_Text_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                }
                                 break;
                             case "AssertAreEqual_Text_ById":
-                                stop = TestTool.AssertAreEqual_Text_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                if (TestDriver.ToLower() == "android")
+                                {
+                                    stop = TestTool.AssertAreEqual_Text_ById(androidDriver, item2.Inivalue[0], item2.Inivalue[1]);
+                                }
+                                else
+                                {
+                                    stop = TestTool.AssertAreEqual_Text_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                }
                                 break;
                             case "AssertAreEqual_Text_ByName":
                                 stop = TestTool.AssertAreEqual_Text_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
@@ -149,8 +183,21 @@ namespace UnitTestProject1
                             case "AssertAreEqual_DropdownSelectValue_ByName":
                                 stop = TestTool.AssertAreEqual_DropdownSelectValue_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
+                            case "AssertIsTrue_Selected_ByXPath":
+                                stop = TestTool.AssertIsTrue_Selected_ByXPath(driver, item2.Inivalue[0]);
+                                break;
+                            case "AssertAreEqual_Android_messageToast_ByXPath":
+                                stop = TestTool.AssertAreEqual_Android_messageToast_ByXPath(androidDriver, item2.Inivalue[0]);
+                                break;
                             case "ClickFindElement_ById":
-                                stop = TestTool.ClickFindElement_ById(driver, item2.Inivalue[0]);
+                                if (TestDriver.ToLower() == "android")
+                                {
+                                    stop = TestTool.ClickFindElement_ById(androidDriver, item2.Inivalue[0]);
+                                }
+                                else
+                                {
+                                    stop = TestTool.ClickFindElement_ById(driver, item2.Inivalue[0]);
+                                }
                                 break;
                             case "ClickFindElement_ByName":
                                 stop = TestTool.ClickFindElement_ByName(driver, item2.Inivalue[0]);
@@ -219,16 +266,35 @@ namespace UnitTestProject1
                                 stop = TestTool.PullDownScroll_ByXPath(driver, item2.Inivalue[0]);
                                 break;
                             case "PullDownScroll_ByXPath_ClickNextPage":
-                                stop = TestTool.PullDownScroll_ByXPath_ClickNextPage(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                stop = TestTool.PullDownScroll_ByXPath_ClickNextPage(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2]);
                                 break;
                             case "SendKeys_ByXPath":
                                 stop = TestTool.SendKeys_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
                             case "SendKeys_ById":
-                                stop = TestTool.SendKeys_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                if (TestDriver.ToLower() == "android")
+                                {
+                                    stop = TestTool.SendKeys_ById(androidDriver, item2.Inivalue[0], item2.Inivalue[1]);
+                                }
+                                else
+                                {
+                                    stop = TestTool.SendKeys_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                }
                                 break;
                             case "SendKeys_ByName":
                                 stop = TestTool.SendKeys_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "swipeToUp":
+                                stop = TestTool.swipeToUp(androidDriver, item2.Inivalue[0]);
+                                break;
+                            case "swipeToDown":
+                                stop = TestTool.swipeToDown(androidDriver, item2.Inivalue[0]);
+                                break;
+                            case "swipeToLeft":
+                                stop = TestTool.swipeToDown(androidDriver, item2.Inivalue[0]);
+                                break;
+                            case "swipeToRight":
+                                stop = TestTool.swipeToDown(androidDriver, item2.Inivalue[0]);
                                 break;
                             case "ThreadSleep":
                                 stop = TestTool.ThreadSleep(driver, item2.Inivalue[0]);
@@ -236,12 +302,33 @@ namespace UnitTestProject1
                             case "TestRememberMe":
                                 driver = TestTool.TestRememberMe(driver, item2.Inivalue[0]);
                                 break;
-                            //case "TempTest":
-                            //    stop = TestTool.TempTest(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                            //    break;
+                            case "Table_GetTrRowNumerAndClickHref_ByXPath":
+                                stop = TestTool.Table_GetTrRowNumerAndClickHref_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2], item2.Inivalue[3], item2.Inivalue[4]);
+                                break;
+                            case "WebDriverWait_AssertAreEqual_Text_ById":
+                                if (TestDriver.ToLower() == "android")
+                                {
+                                    stop = TestTool.WebDriverWait_AssertAreEqual_Text_ById(androidDriver, item2.Inivalue[0], item2.Inivalue[1]);
+                                }
+                                else
+                                {
+                                    stop = TestTool.WebDriverWait_AssertAreEqual_Text_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                }
+                                break;
+                            case "WebDriverWait_Dropdown_SelectText_ByName":
+                                stop = TestTool.WebDriverWait_Dropdown_SelectText_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "WebDriverWait_Dropdown_SelectText_ById":
+                                stop = TestTool.WebDriverWait_Dropdown_SelectText_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
+                            case "TempTest":
+                                stop = TestTool.TempTest(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2], item2.Inivalue[3], item2.Inivalue[3]);
+                                break;
                             default:
                                 TestTool.writeLog("error", item2.IniName + "：不存在!!");
                                 break;
+                                #endregion
+
                         }
                         Assert.IsTrue(stop);
                     }

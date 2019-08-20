@@ -15,11 +15,56 @@ using System.Collections.ObjectModel;
 using System.Drawing;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Appium.Android;
+
 
 namespace ClassLibrary1
 {
     public class TestMethodList
     {
+        public bool TempTest(IWebDriver driver,string TableID,string QueryString ,string ALinkNum,string ClickNextXPath,string CheckPageBody)
+        {
+            try
+            {
+                //ClickNextXPath = 點擊下一頁的按鈕的XPath
+                //CheckPageBody = 檢查上一頁與下一頁內容是否相同
+                string XPath = "//*[@id='" + TableID + "']//*[text()='" + QueryString + "']";
+                string tempDate = "";
+                string LogMessage = "";
+                //使用滾動捲軸找到符合文字
+                while (!ReelScroll(driver, XPath))
+                {
+                    tempDate = driver.FindElement(By.XPath(CheckPageBody)).Text;
+                    //點擊下一頁
+                    driver.FindElement(By.XPath(ClickNextXPath)).Click();
+
+                    if (tempDate != driver.FindElement(By.XPath(CheckPageBody)).Text)
+                    {
+                        LogMessage = "Message：無符合的文字!!!";
+                        break;
+                    }
+                }
+                if (LogMessage == "")
+                {
+                    XPath = "//*[@id='" + TableID + "']";
+                    IWebElement simpleTable = driver.FindElement(By.XPath(XPath));
+                    IList<IWebElement> rows = simpleTable.FindElements(By.TagName("tr"));
+                    IWebElement tr = rows.FirstOrDefault(p => p.Text.Contains(QueryString));
+                    int trIndex = rows.IndexOf(tr);
+                    string NewXpath = XPath + "/tbody/tr[" + trIndex + "]//*/a[" + ALinkNum + "]";
+                    driver.FindElement(By.XPath(NewXpath)).Click();
+                }
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+
+       
         #region A
         /// <summary>
         /// 依網頁的Title內容與輸入的文字進行驗證
@@ -51,6 +96,20 @@ namespace ClassLibrary1
         /// <param name="CheckString"></param>
         /// <returns></returns>
         public bool AssertAreEqual_Text_ByXPath(IWebDriver driver, string XPath, string CheckString)
+        {
+            try
+            {
+                Assert.AreEqual(CheckString, driver.FindElement(By.XPath(XPath)).Text);
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        public bool AssertAreEqual_Text_ByXPath(AndroidDriver<AndroidElement> driver, string XPath, string CheckString)
         {
             try
             {
@@ -522,6 +581,47 @@ namespace ClassLibrary1
         }
 
         //--------------------------------------------------------------------//
+        /// <summary>
+        /// 判斷是否被選取-ByXPath
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="XPath"></param>
+        /// <returns></returns>
+         public bool AssertIsTrue_Selected_ByXPath(IWebDriver driver,string XPath)
+        {
+            try
+            {
+                Assert.IsTrue(driver.FindElement(By.XPath(XPath)).Selected);
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+
+        //--------------------------------------------------------------------//
+        public bool AssertAreEqual_Android_messageToast_ByXPath(AndroidDriver<AndroidElement> driver, string CheckString)
+        {
+            try
+            {
+                
+                string message = string.Format("//*[@text=\'{0}\']", CheckString);
+                AndroidElement toastView = driver.FindElement(By.XPath("//android.widget.Toast[1]"));
+                String text = toastView.GetAttribute("name");
+                Trace.WriteLine("message：" + text);
+                Assert.AreEqual(CheckString, text);
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
         #endregion
 
         #region C
@@ -536,6 +636,20 @@ namespace ClassLibrary1
             try
             {
                 driver.FindElement(By.Id(Id)).Click();
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        public bool ClickFindElement_ById(AndroidDriver<AndroidElement> driver, string Id)
+        {
+            try
+            {
+                driver.FindElementById(Id).Click();
                 passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
                 return true;
             }
@@ -1113,20 +1227,26 @@ namespace ClassLibrary1
         /// <param name="driver"></param>
         /// <param name="XPath"></param>
         /// <param name="ClickXPath"></param>
+        /// <param name="CheckPageBody">檢查是否有跳至下一頁內容</param>
         /// <returns></returns>
-        public bool PullDownScroll_ByXPath_ClickNextPage(IWebDriver driver, string XPath, string ClickXPath)
+        public bool PullDownScroll_ByXPath_ClickNextPage(IWebDriver driver, string XPath, string ClickXPath,string CheckPageBody)
         {
             try
             {
+                string tempDate = "";
+                string LogMessage = "";
                 //使用滾動捲軸找到符合文字
-                while (!ReelScroll(driver, XPath))
+                queryTableAndClickNextPage(driver, ClickXPath, CheckPageBody, XPath, ref tempDate, ref LogMessage);
+                if (LogMessage!="")
                 {
-                    //點擊下一頁
-                    driver.FindElement(By.XPath(ClickXPath)).Click();
+                    errorMessage("無相符的文字", System.Reflection.MethodBase.GetCurrentMethod().Name);
+                    return true;
                 }
-
-                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
-                return true;
+                else
+                {
+                    passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                    return true;
+                }
             }
             catch (Exception ex)
             {
@@ -1181,6 +1301,20 @@ namespace ClassLibrary1
                 return false;
             }
         }
+        public bool SendKeys_ById(AndroidDriver<AndroidElement> driver, string Id, string SendKeys)
+        {
+            try
+            {
+                driver.FindElement(By.Id(Id)).SendKeys(SendKeys);
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
         /// <summary>
         /// 找到元素名稱並輸入鍵盤資料
         /// </summary>
@@ -1202,7 +1336,102 @@ namespace ClassLibrary1
                 return false;
             }
         }
-        
+        /// <summary>
+        /// 上滑
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="during"></param>
+        /// <returns></returns>
+        public bool swipeToUp(AndroidDriver<AndroidElement> driver, string during)
+        {
+            try
+            {
+                int width = driver.Manage().Window.Size.Width;
+                
+                int height = driver.Manage().Window.Size.Height;
+                Trace.WriteLine("width：" + width);
+                Trace.WriteLine("height：" + height);
+                driver.Swipe(width / 2, height * 3 / 4, width / 2, height / 4, Convert.ToInt32(during));
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        /// <summary>
+        /// 下滑
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="during"></param>
+        /// <returns></returns>
+        public bool swipeToDown(AndroidDriver<AndroidElement> driver, string during)
+        {
+            try
+            {
+                int width = driver.Manage().Window.Size.Width;
+                int height = driver.Manage().Window.Size.Height;
+                driver.Swipe(width / 2, height / 4, width / 2, height * 3 / 4, Convert.ToInt32(during));
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        /// <summary>
+        /// 左滑
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="during"></param>
+        /// <returns></returns>
+        public bool swipeToLeft(AndroidDriver<AndroidElement> driver, string during)
+        {
+            try
+            {
+                int width = driver.Manage().Window.Size.Width;
+                int height = driver.Manage().Window.Size.Height;
+                System.Console.WriteLine(width);
+                System.Console.WriteLine(height);
+                driver.Swipe(width * 3 / 4, height / 2, width / 4, height / 2, Convert.ToInt32(during));
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        /// <summary>
+        /// 右滑
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="during"></param>
+        /// <returns></returns>
+        public bool swipeToRight(AndroidDriver<AndroidElement> driver, string during)
+        {
+            try
+            {
+                int width = driver.Manage().Window.Size.Width;
+                int height = driver.Manage().Window.Size.Height;
+                System.Console.WriteLine(width);
+                System.Console.WriteLine(height);
+                driver.Swipe(width / 4, height / 2, width * 3 / 4, height / 2, Convert.ToInt32(during));
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+
         #endregion
 
         #region T
@@ -1249,16 +1478,112 @@ namespace ClassLibrary1
             
 
         }
-
-        #endregion
-
-
-        public bool TempTest(IWebDriver driver, string XPath,string data)
+        /// <summary>
+        /// 依輸入的文字查詢符合的tr列數，再從該列點擊相關的超連接
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="xpath"></param>
+        /// <param name="clickTarget"></param>
+        /// <param name="colLink"></param>
+        /// <returns></returns>
+        public bool Table_GetTrRowNumerAndClickHref_ByXPath(IWebDriver driver, string TableID, string QueryString, string ALinkNum, string ClickNextXPath, string CheckPageBody)
         {
             try
             {
-                var CssValue = driver.FindElement(By.XPath(XPath)).GetCssValue(data);
-                RgbToHex(CssValue);
+                //ClickNextXPath = 點擊下一頁的按鈕的XPath
+                //CheckPageBody = 檢查上一頁與下一頁內容是否相同
+                string XPath = "//*[@id='" + TableID + "']//*[text()='" + QueryString + "']";
+                string tempDate = "";
+                string LogMessage = "";
+                //使用滾動捲軸找到符合文字
+                queryTableAndClickNextPage(driver, ClickNextXPath, CheckPageBody, XPath, ref tempDate, ref LogMessage);
+                if (LogMessage == "")
+                {
+                    XPath = "//*[@id='" + TableID + "']";
+                    IWebElement simpleTable = driver.FindElement(By.XPath(XPath));
+                    IList<IWebElement> rows = simpleTable.FindElements(By.TagName("tr"));
+                    IWebElement tr = rows.FirstOrDefault(p => p.Text.Contains(QueryString));
+                    int trIndex = rows.IndexOf(tr);
+                    string NewXpath = XPath + "/tbody/tr[" + trIndex + "]//*/a[" + ALinkNum + "]";
+                    driver.FindElement(By.XPath(NewXpath)).Click();
+                }
+                else
+                {
+                    errorMessage("無相符的文字", System.Reflection.MethodBase.GetCurrentMethod().Name);
+                    return false;
+                }
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+
+        
+
+        #endregion
+
+        #region W
+        /// <summary>
+        /// 等待元素載完再去執行-依ID
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="Id"></param>
+        /// <param name="CheckString"></param>
+        /// <returns></returns>
+        public bool WebDriverWait_AssertAreEqual_Text_ById(IWebDriver driver, string Id, string CheckString)
+        {
+            try
+            {
+                WebDriverWait wait = new WebDriverWait(driver, System.TimeSpan.FromSeconds(60));
+                string text = wait.Until(d => d.FindElement(By.Id(Id))).Text;
+                Trace.WriteLine("message：" + text);
+                Assert.AreEqual(CheckString, text);
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        public bool WebDriverWait_AssertAreEqual_Text_ById(AndroidDriver<AndroidElement> driver, string Id, string CheckString)
+        {
+            try
+            {
+                WebDriverWait wait = new WebDriverWait(driver, System.TimeSpan.FromSeconds(60));
+                string text = wait.Until(d => d.FindElement(By.Id(Id))).Text;
+                Trace.WriteLine("message：" + text);
+                Assert.AreEqual(CheckString, text);
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 等待元素載完再去執行_下拉式選單-元素Name,依TEXT
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="Name"></param>
+        /// <param name="selectValue"></param>
+        /// <returns></returns>
+        public bool WebDriverWait_Dropdown_SelectText_ByName(IWebDriver driver, string Name, string selectText)
+        {
+            try
+            {
+                WebDriverWait wait = new WebDriverWait(driver, System.TimeSpan.FromSeconds(60));
+                IWebElement selectElem = wait.Until(d => d.FindElement(By.Name(Name)));
+                SelectElement selectObj = new SelectElement(selectElem);
+                selectObj.SelectByText(selectText);
                 passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
                 return true;
             }
@@ -1268,6 +1593,35 @@ namespace ClassLibrary1
                 return false; 
             }
         }
+        /// <summary>
+        /// 等待元素載完再去執行_下拉式選單-元素Id,依TEXT
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="Name"></param>
+        /// <param name="selectValue"></param>
+        /// <returns></returns>
+        public bool WebDriverWait_Dropdown_SelectText_ById(IWebDriver driver, string Id, string selectText)
+        {
+            try
+            {
+                WebDriverWait wait = new WebDriverWait(driver, System.TimeSpan.FromSeconds(60));
+                IWebElement selectElem = wait.Until(d => d.FindElement(By.Id(Id)));
+                SelectElement selectObj = new SelectElement(selectElem);
+                selectObj.SelectByText(selectText);
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+
+        #endregion
+
+
+        
         #region 通用
             /// <summary>
             /// 執行成功訊息
@@ -1444,6 +1798,22 @@ namespace ClassLibrary1
             catch (Exception ex)
             {
                 writeLog("Error", "複製文件出現異常" + ex.Message);
+            }
+        }
+
+        private void queryTableAndClickNextPage(IWebDriver driver, string ClickNextXPath, string CheckPageBody, string XPath, ref string tempDate, ref string LogMessage)
+        {
+            while (!ReelScroll(driver, XPath))
+            {
+                tempDate = driver.FindElement(By.XPath(CheckPageBody)).Text;
+                //點擊下一頁
+                driver.FindElement(By.XPath(ClickNextXPath)).Click();
+
+                if (tempDate != driver.FindElement(By.XPath(CheckPageBody)).Text)
+                {
+                    LogMessage = "Message：無符合的文字!!!";
+                    break;
+                }
             }
         }
         #endregion
