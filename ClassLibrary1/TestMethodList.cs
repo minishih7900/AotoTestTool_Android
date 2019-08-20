@@ -1265,7 +1265,7 @@ namespace ClassLibrary1
             catch (Exception ex)
             {
                 errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
-                return false;
+                return false; 
             }
         }
         #region 通用
