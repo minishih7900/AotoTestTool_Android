@@ -16,44 +16,20 @@ using System.Drawing;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Appium.Android;
+using System.Windows.Forms;
 
 
 namespace ClassLibrary1
 {
     public class TestMethodList
     {
-        public bool TempTest(IWebDriver driver,string TableID,string QueryString ,string ALinkNum,string ClickNextXPath,string CheckPageBody)
+        public bool TempTest(IWebDriver driver,string XPath)
         {
             try
             {
-                //ClickNextXPath = 點擊下一頁的按鈕的XPath
-                //CheckPageBody = 檢查上一頁與下一頁內容是否相同
-                string XPath = "//*[@id='" + TableID + "']//*[text()='" + QueryString + "']";
-                string tempDate = "";
-                string LogMessage = "";
-                //使用滾動捲軸找到符合文字
-                while (!ReelScroll(driver, XPath))
-                {
-                    tempDate = driver.FindElement(By.XPath(CheckPageBody)).Text;
-                    //點擊下一頁
-                    driver.FindElement(By.XPath(ClickNextXPath)).Click();
-
-                    if (tempDate != driver.FindElement(By.XPath(CheckPageBody)).Text)
-                    {
-                        LogMessage = "Message：無符合的文字!!!";
-                        break;
-                    }
-                }
-                if (LogMessage == "")
-                {
-                    XPath = "//*[@id='" + TableID + "']";
-                    IWebElement simpleTable = driver.FindElement(By.XPath(XPath));
-                    IList<IWebElement> rows = simpleTable.FindElements(By.TagName("tr"));
-                    IWebElement tr = rows.FirstOrDefault(p => p.Text.Contains(QueryString));
-                    int trIndex = rows.IndexOf(tr);
-                    string NewXpath = XPath + "/tbody/tr[" + trIndex + "]//*/a[" + ALinkNum + "]";
-                    driver.FindElement(By.XPath(NewXpath)).Click();
-                }
+                
+                Trace.WriteLine(driver.FindElement(By.XPath(XPath)).Displayed);
+                Assert.IsTrue(driver.FindElement(By.XPath(XPath)).Displayed);
                 passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
                 return true;
             }
@@ -460,6 +436,30 @@ namespace ClassLibrary1
                 return false;
             }
         }
+        /// <summary>
+        /// 判斷測試元素Name是否存在，可以自行輸入是要存在還是不存在。
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="Name"></param>
+        /// <param name="exist"></param>
+        /// <returns></returns>
+        public bool AssertAreEqual_ElementExist_ByLinkText(IWebDriver driver, string LinkText, string exist)
+        {
+            try
+            {
+                bool temp = doesWebElementExist(driver, "LinkText", LinkText);
+                Assert.AreEqual(exist.ToLower(), temp.ToString().ToLower());
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+
+
         //--------------------------------------------------------------------//
 
         //--------------------------------------------------------------------//
@@ -601,8 +601,35 @@ namespace ClassLibrary1
                 return false;
             }
         }
+        /// <summary>
+        /// 給True/False來判斷DriverTitle的值是真或假
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="condition"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public bool AssertIsTrue_DriverTitle(IWebDriver driver, string condition, string message)
+        {
+            try
+            {
+                Assert.IsTrue(Convert.ToBoolean(condition) == (driver.Title == message));
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
 
         //--------------------------------------------------------------------//
+        /// <summary>
+        /// 檢查訊息文字是否正確
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="CheckString"></param>
+        /// <returns></returns>
         public bool AssertAreEqual_Android_messageToast_ByXPath(AndroidDriver<AndroidElement> driver, string CheckString)
         {
             try
@@ -622,6 +649,40 @@ namespace ClassLibrary1
                 return false;
             }
         }
+
+        //--------------------------------------------------------------------//
+        /// <summary>
+        /// 指定元素並按右鍵，顯示右鍵清單，選擇右鍵清單選項
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="XPath">元素</param>
+        /// <param name="RightKeys">右鍵清單快捷鍵</param>
+        /// <returns></returns>
+        public bool Action_ContextClick_ByXPath(IWebDriver driver, string XPath, string RightKeys)
+        {
+            try
+            {
+                IWebElement btnEle = driver.FindElement(By.XPath(XPath));
+
+                Actions actionsObj = new Actions(driver);
+
+                //點擊右鍵選單
+                actionsObj.ContextClick(btnEle).Perform();
+                SendKeys.SendWait(RightKeys);
+                SendKeys.SendWait("{ENTER}");
+
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+
+
+
         #endregion
 
         #region C
@@ -1337,12 +1398,33 @@ namespace ClassLibrary1
             }
         }
         /// <summary>
+        /// 使用windows.forms的sendkeys來輸入
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="SendKeysData"></param>
+        /// <returns></returns>
+        public bool SendKeys_SendWait(IWebDriver driver, string SendKeysData)
+        {
+            try
+            {
+                SendKeys.SendWait(SendKeysData);
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 上滑
         /// </summary>
         /// <param name="driver"></param>
-        /// <param name="during"></param>
+        /// <param name="duration"></param>
         /// <returns></returns>
-        public bool swipeToUp(AndroidDriver<AndroidElement> driver, string during)
+        public bool swipeToUp(AndroidDriver<AndroidElement> driver, string duration)
         {
             try
             {
@@ -1351,7 +1433,7 @@ namespace ClassLibrary1
                 int height = driver.Manage().Window.Size.Height;
                 Trace.WriteLine("width：" + width);
                 Trace.WriteLine("height：" + height);
-                driver.Swipe(width / 2, height * 3 / 4, width / 2, height / 4, Convert.ToInt32(during));
+                driver.Swipe(width / 2, height * 3 / 4, width / 2, height / 4, Convert.ToInt32(duration));
                 passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
                 return true;
             }
@@ -1365,15 +1447,15 @@ namespace ClassLibrary1
         /// 下滑
         /// </summary>
         /// <param name="driver"></param>
-        /// <param name="during"></param>
+        /// <param name="duration"></param>
         /// <returns></returns>
-        public bool swipeToDown(AndroidDriver<AndroidElement> driver, string during)
+        public bool swipeToDown(AndroidDriver<AndroidElement> driver, string duration)
         {
             try
             {
                 int width = driver.Manage().Window.Size.Width;
                 int height = driver.Manage().Window.Size.Height;
-                driver.Swipe(width / 2, height / 4, width / 2, height * 3 / 4, Convert.ToInt32(during));
+                driver.Swipe(width / 2, height / 4, width / 2, height * 3 / 4, Convert.ToInt32(duration));
                 passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
                 return true;
             }
@@ -1387,9 +1469,9 @@ namespace ClassLibrary1
         /// 左滑
         /// </summary>
         /// <param name="driver"></param>
-        /// <param name="during"></param>
+        /// <param name="duration"></param>
         /// <returns></returns>
-        public bool swipeToLeft(AndroidDriver<AndroidElement> driver, string during)
+        public bool swipeToLeft(AndroidDriver<AndroidElement> driver, string duration)
         {
             try
             {
@@ -1397,7 +1479,7 @@ namespace ClassLibrary1
                 int height = driver.Manage().Window.Size.Height;
                 System.Console.WriteLine(width);
                 System.Console.WriteLine(height);
-                driver.Swipe(width * 3 / 4, height / 2, width / 4, height / 2, Convert.ToInt32(during));
+                driver.Swipe(width * 3 / 4, height / 2, width / 4, height / 2, Convert.ToInt32(duration));
                 passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
                 return true;
             }
@@ -1411,9 +1493,9 @@ namespace ClassLibrary1
         /// 右滑
         /// </summary>
         /// <param name="driver"></param>
-        /// <param name="during"></param>
+        /// <param name="duration"></param>
         /// <returns></returns>
-        public bool swipeToRight(AndroidDriver<AndroidElement> driver, string during)
+        public bool swipeToRight(AndroidDriver<AndroidElement> driver, string duration)
         {
             try
             {
@@ -1421,7 +1503,7 @@ namespace ClassLibrary1
                 int height = driver.Manage().Window.Size.Height;
                 System.Console.WriteLine(width);
                 System.Console.WriteLine(height);
-                driver.Swipe(width / 4, height / 2, width * 3 / 4, height / 2, Convert.ToInt32(during));
+                driver.Swipe(width / 4, height / 2, width * 3 / 4, height / 2, Convert.ToInt32(duration));
                 passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
                 return true;
             }
@@ -1551,6 +1633,13 @@ namespace ClassLibrary1
                 return false;
             }
         }
+        /// <summary>
+        /// 等待物件60秒，依元素Id找到內容並與輸入的文字進行驗證
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="Id"></param>
+        /// <param name="CheckString"></param>
+        /// <returns></returns>
         public bool WebDriverWait_AssertAreEqual_Text_ById(AndroidDriver<AndroidElement> driver, string Id, string CheckString)
         {
             try
@@ -1570,7 +1659,7 @@ namespace ClassLibrary1
         }
 
         /// <summary>
-        /// 等待元素載完再去執行_下拉式選單-元素Name,依TEXT
+        /// 等待元素載60秒完再去執行_下拉式選單-元素Name,依TEXT
         /// </summary>
         /// <param name="driver"></param>
         /// <param name="Name"></param>
@@ -1594,7 +1683,7 @@ namespace ClassLibrary1
             }
         }
         /// <summary>
-        /// 等待元素載完再去執行_下拉式選單-元素Id,依TEXT
+        /// 等待元素60秒載完再去執行_下拉式選單-元素Id,依TEXT
         /// </summary>
         /// <param name="driver"></param>
         /// <param name="Name"></param>
@@ -1749,6 +1838,9 @@ namespace ClassLibrary1
                         driver.FindElement(By.Id(FindElement));
                         break;
                     case "Name":
+                        driver.FindElement(By.Name(FindElement));
+                        break;
+                    case "LinkText":
                         driver.FindElement(By.Name(FindElement));
                         break;
                 }

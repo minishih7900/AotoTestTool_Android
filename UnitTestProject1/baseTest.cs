@@ -11,7 +11,7 @@ using System.IO;
 using UnitTestProject1.Model;
 using ClassLibrary1;
 using System.Linq;
-
+using System.Text.RegularExpressions;
 
 namespace UnitTestProject1
 {
@@ -64,14 +64,56 @@ namespace UnitTestProject1
                 }
                 else
                 {
-                    
-                        string[] ss = s.Split(new char[] { '=' }, 2);
-                        List<string> sss = ss[1].Split(',').ToList();
-                        result[index].IniDetail.Add(new Detail() { IniName = ss[0], Inivalue = sss });
+                    string[] ss = s.Split(new char[] { '=' }, 2);
+                    List<string> spList = new List<string> { "\\,", "\\." };
+                    List<string> spList2 = new List<string> { "{44}", "{46}"};
+                    List<string> sss = ConvertToByte(ss[1], spList).Split(',').ToList();
+                    sss = ConverToString(sss, spList2);
+                    //sss = sss.Select(c => c.Replace("{44}", ",")).ToList();
+                    //List<string> sss = ss[1].Split(',').ToList();
+                    result[index].IniDetail.Add(new Detail() { IniName = ss[0], Inivalue = sss });
                 }
             }
             return result;
         }
-      
+        public static string ConvertToByte(string tempString,List<string> spList)
+        {
+            if (spList.Any(tempString.Contains))
+            {
+                foreach (var item in spList)
+                {
+                    int dd = Convert.ToChar(item.Substring(item.Length-1,1));
+                    tempString = tempString.Replace(item, "{"+ dd + "}");
+                }
+                return tempString;
+            }
+            else
+            {
+                return tempString;
+            }
+        }
+        public static List<string> ConverToString (List<string> tempList, List<string> spList)
+        {
+            if (spList.Any(x => tempList.Any(p => p.Contains(x))))
+            {
+                List<string> newTemp = new List<string>();
+                foreach (var item in tempList)
+                {
+                    string tempstring = item;
+                    foreach (var spchar in spList)
+                    {
+                        var dd = Convert.ToInt16(Regex.Replace(spchar, "[^0-9]", ""));
+                        var cc = Convert.ToChar(dd).ToString();
+                        tempstring = tempstring.Replace(spchar, cc);
+                    }
+                    newTemp.Add(tempstring);
+                }
+                return newTemp;
+            }
+            else
+            {
+                return tempList;
+            }
+        }
     }
 }

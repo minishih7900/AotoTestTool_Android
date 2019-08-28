@@ -11,6 +11,7 @@ using UnitTestProject1.Model;
 using OpenQA.Selenium.Appium.Android;
 using OpenQA.Selenium.Appium.Enums;
 using OpenQA.Selenium.Remote;
+using System.Reflection;
 
 namespace UnitTestProject1
 {
@@ -86,7 +87,16 @@ namespace UnitTestProject1
                     TestFunction(IniData);
                 }
             }
+
+            //輸出方法清單
+            //TestMethodList temp = new TestMethodList();
+            //Type temType = temp.GetType();
+            //foreach (var prop in temType.GetMethods())
+            //{
+            //    TestTool.writeLog("Trace", prop.ToString());
+            //}
             
+
         }
 
         private static void TestFunction(List<IniModel> IniData)
@@ -102,7 +112,7 @@ namespace UnitTestProject1
                     foreach (var item2 in item.IniDetail)
                     {
                         funName = item2.IniName;
-
+                        
                         #region chrome
                         switch (item2.IniName)
                         {
@@ -171,6 +181,9 @@ namespace UnitTestProject1
                             case "AssertAreEqual_ElementExist_ByName":
                                 stop = TestTool.AssertAreEqual_ElementExist_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
+                            case "AssertAreEqual_ElementExist_ByLinkText":
+                                stop = TestTool.AssertAreEqual_ElementExist_ByLinkText(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                                break;
                             case "AssertAreEqual_SelectListValuet_ByClassName":
                                 stop = TestTool.AssertAreEqual_SelectListValuet_ByClassName(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
@@ -183,11 +196,14 @@ namespace UnitTestProject1
                             case "AssertAreEqual_DropdownSelectValue_ByName":
                                 stop = TestTool.AssertAreEqual_DropdownSelectValue_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
+                            case "AssertAreEqual_Android_messageToast_ByXPath":
+                                stop = TestTool.AssertAreEqual_Android_messageToast_ByXPath(androidDriver, item2.Inivalue[0]);
+                                break;
                             case "AssertIsTrue_Selected_ByXPath":
                                 stop = TestTool.AssertIsTrue_Selected_ByXPath(driver, item2.Inivalue[0]);
                                 break;
-                            case "AssertAreEqual_Android_messageToast_ByXPath":
-                                stop = TestTool.AssertAreEqual_Android_messageToast_ByXPath(androidDriver, item2.Inivalue[0]);
+                            case "Action_ContextClick_ByXPath":
+                                stop = TestTool.Action_ContextClick_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
                             case "ClickFindElement_ById":
                                 if (TestDriver.ToLower() == "android")
@@ -284,6 +300,9 @@ namespace UnitTestProject1
                             case "SendKeys_ByName":
                                 stop = TestTool.SendKeys_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
+                            case "SendKeys_SendWait":
+                                stop = TestTool.SendKeys_SendWait(driver, item2.Inivalue[0]);
+                                break;
                             case "swipeToUp":
                                 stop = TestTool.swipeToUp(androidDriver, item2.Inivalue[0]);
                                 break;
@@ -322,7 +341,7 @@ namespace UnitTestProject1
                                 stop = TestTool.WebDriverWait_Dropdown_SelectText_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
                                 break;
                             case "TempTest":
-                                stop = TestTool.TempTest(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2], item2.Inivalue[3], item2.Inivalue[3]);
+                                stop = TestTool.TempTest(driver, item2.Inivalue[0]);
                                 break;
                             default:
                                 TestTool.writeLog("error", item2.IniName + "：不存在!!");
