@@ -12,6 +12,7 @@ using OpenQA.Selenium.Appium.Android;
 using OpenQA.Selenium.Appium.Enums;
 using OpenQA.Selenium.Remote;
 using System.Reflection;
+using System.Linq;
 
 namespace UnitTestProject1
 {
@@ -76,12 +77,13 @@ namespace UnitTestProject1
         [TestMethod]
         public void T1()
         {
-            // 取得資料夾內所有檔案
+            
+            //取得資料夾內所有檔案
             foreach (string fname in System.IO.Directory.GetFileSystemEntries(@"C:\temp\log\", "TEST*.ini"))
             {
                 TestTool.writeLog("Trace", "----開始讀取----" + Path.GetFileName(fname));
-                List<IniModel>  IniData = ReadAllData(fname);
-                if (IniData.Count>0)
+                List<IniModel> IniData = ReadAllData(fname);
+                if (IniData.Count > 0)
                 {
                     InitializeClass();
                     TestFunction(IniData);
@@ -95,13 +97,14 @@ namespace UnitTestProject1
             //{
             //    TestTool.writeLog("Trace", prop.ToString());
             //}
-            
+
 
         }
 
         private static void TestFunction(List<IniModel> IniData)
         {
             var funName = "";
+            int PassTotal = 0;
             bool stop = true;
             try
             {
@@ -111,251 +114,18 @@ namespace UnitTestProject1
 
                     foreach (var item2 in item.IniDetail)
                     {
-                        funName = item2.IniName;
-                        
-                        #region chrome
-                        switch (item2.IniName)
-                        {
-                            case "AssertAreEqual_DriverTitle":
-                                stop = TestTool.AssertAreEqual_DriverTitle(driver, item2.Inivalue[0]);
-                                break;
-                            case "AssertAreEqual_Text_ByXPath":
-                                if (TestDriver.ToLower() == "android")
-                                {
-                                    stop = TestTool.AssertAreEqual_Text_ByXPath(androidDriver, item2.Inivalue[0], item2.Inivalue[1]);
-                                }
-                                else
-                                {
-                                    stop = TestTool.AssertAreEqual_Text_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                }
-                                break;
-                            case "AssertAreEqual_Text_ById":
-                                if (TestDriver.ToLower() == "android")
-                                {
-                                    stop = TestTool.AssertAreEqual_Text_ById(androidDriver, item2.Inivalue[0], item2.Inivalue[1]);
-                                }
-                                else
-                                {
-                                    stop = TestTool.AssertAreEqual_Text_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                }
-                                break;
-                            case "AssertAreEqual_Text_ByName":
-                                stop = TestTool.AssertAreEqual_Text_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_Text_ByTagName":
-                                stop = TestTool.AssertAreEqual_Text_ByTagName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_Text_ByClassName":
-                                stop = TestTool.AssertAreEqual_Text_ByClassName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_Value_ByXPath":
-                                stop = TestTool.AssertAreEqual_Value_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_Value_ById":
-                                stop = TestTool.AssertAreEqual_Value_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_Value_ByName":
-                                stop = TestTool.AssertAreEqual_Value_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_Value_ByTagName":
-                                stop = TestTool.AssertAreEqual_Value_ByTagName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_Value_ByClassName":
-                                stop = TestTool.AssertAreEqual_Value_ByClassName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_GetCssColor_ByXPath":
-                                stop = TestTool.AssertAreEqual_GetCssColor_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2]);
-                                break;
-                            case "AssertAreEqual_GetCssColor_ById":
-                                stop = TestTool.AssertAreEqual_GetCssColor_ById(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2]);
-                                break;
-                            case "AssertAreEqual_GetCssColor_ByName":
-                                stop = TestTool.AssertAreEqual_GetCssColor_ByName(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2]);
-                                break;
-                            case "AssertAreEqual_ElementExist_ByXPath":
-                                stop = TestTool.AssertAreEqual_ElementExist_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_ElementExist_ById":
-                                stop = TestTool.AssertAreEqual_ElementExist_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_ElementExist_ByName":
-                                stop = TestTool.AssertAreEqual_ElementExist_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_ElementExist_ByLinkText":
-                                stop = TestTool.AssertAreEqual_ElementExist_ByLinkText(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_SelectListValuet_ByClassName":
-                                stop = TestTool.AssertAreEqual_SelectListValuet_ByClassName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_DropdownSelectValue_ByXPath":
-                                stop = TestTool.AssertAreEqual_DropdownSelectValue_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_DropdownSelectValue_ById":
-                                stop = TestTool.AssertAreEqual_DropdownSelectValue_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_DropdownSelectValue_ByName":
-                                stop = TestTool.AssertAreEqual_DropdownSelectValue_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "AssertAreEqual_Android_messageToast_ByXPath":
-                                stop = TestTool.AssertAreEqual_Android_messageToast_ByXPath(androidDriver, item2.Inivalue[0]);
-                                break;
-                            case "AssertIsTrue_Selected_ByXPath":
-                                stop = TestTool.AssertIsTrue_Selected_ByXPath(driver, item2.Inivalue[0]);
-                                break;
-                            case "Action_ContextClick_ByXPath":
-                                stop = TestTool.Action_ContextClick_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "ClickFindElement_ById":
-                                if (TestDriver.ToLower() == "android")
-                                {
-                                    stop = TestTool.ClickFindElement_ById(androidDriver, item2.Inivalue[0]);
-                                }
-                                else
-                                {
-                                    stop = TestTool.ClickFindElement_ById(driver, item2.Inivalue[0]);
-                                }
-                                break;
-                            case "ClickFindElement_ByName":
-                                stop = TestTool.ClickFindElement_ByName(driver, item2.Inivalue[0]);
-                                break;
-                            case "ClickFindElement_ByXPath":
-                                stop = TestTool.ClickFindElement_ByXPath(driver, item2.Inivalue[0]);
-                                break;
-                            case "ClickFindElement_ByLinkText":
-                                stop = TestTool.ClickFindElement_ByLinkText(driver, item2.Inivalue[0]);
-                                break;
-                            case "ClickJSFindElement_ByXPath":
-                                stop = TestTool.ClickJSFindElement_ByXPath(driver, item2.Inivalue[0]);
-                                break;
-                            case "ClearFindElement_ByXPath":
-                                stop = TestTool.ClearFindElement_ByXPath(driver, item2.Inivalue[0]);
-                                break;
-                            case "ClearFindElement_ById":
-                                stop = TestTool.ClearFindElement_ById(driver, item2.Inivalue[0]);
-                                break;
-                            case "ClearFindElement_ByName":
-                                stop = TestTool.ClearFindElement_ByName(driver, item2.Inivalue[0]);
-                                break;
-                            case "Dropdown_SelectValue_ByXPath":
-                                stop = TestTool.Dropdown_SelectValue_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "Dropdown_SelectValue_ById":
-                                stop = TestTool.Dropdown_SelectValue_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "Dropdown_SelectValue_ByName":
-                                stop = TestTool.Dropdown_SelectValue_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "Dropdown_SelectText_ByXPath":
-                                stop = TestTool.Dropdown_SelectText_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "Dropdown_SelectText_ById":
-                                stop = TestTool.Dropdown_SelectText_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "Dropdown_SelectText_ByName":
-                                stop = TestTool.Dropdown_SelectText_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "Dropdown_SelectTextEveryoneInput_ByXPath":
-                                stop = TestTool.Dropdown_SelectTextEveryoneInput_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "Dropdown_SelectTextEveryoneInput_ById":
-                                stop = TestTool.Dropdown_SelectTextEveryoneInput_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "Dropdown_SelectTextEveryoneInput_ByName":
-                                stop = TestTool.Dropdown_SelectTextEveryoneInput_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "Driver_SwitchTo":
-                                stop = TestTool.Driver_SwitchTo(driver, item2.Inivalue[0]);
-                                break;
-                            case "Driver_Quit":
-                                stop = TestTool.Driver_Quit(driver);
-                                break;
-                            case "Driver_Close":
-                                stop = TestTool.Driver_Close(driver);
-                                break;
-                            case "GoToUrl":
-                                stop = TestTool.GoToUrl(driver, item2.Inivalue[0]);
-                                break;
-                            case "IJavaScriptExecutor_BrowserAddPaging":
-                                stop = TestTool.IJavaScriptExecutor_BrowserAddPaging(driver, item2.Inivalue[0]);
-                                break;
-                            case "PullDownScroll_ByXPath":
-                                stop = TestTool.PullDownScroll_ByXPath(driver, item2.Inivalue[0]);
-                                break;
-                            case "PullDownScroll_ByXPath_ClickNextPage":
-                                stop = TestTool.PullDownScroll_ByXPath_ClickNextPage(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2]);
-                                break;
-                            case "SendKeys_ByXPath":
-                                stop = TestTool.SendKeys_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "SendKeys_ById":
-                                if (TestDriver.ToLower() == "android")
-                                {
-                                    stop = TestTool.SendKeys_ById(androidDriver, item2.Inivalue[0], item2.Inivalue[1]);
-                                }
-                                else
-                                {
-                                    stop = TestTool.SendKeys_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                }
-                                break;
-                            case "SendKeys_ByName":
-                                stop = TestTool.SendKeys_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "SendKeys_SendWait":
-                                stop = TestTool.SendKeys_SendWait(driver, item2.Inivalue[0]);
-                                break;
-                            case "swipeToUp":
-                                stop = TestTool.swipeToUp(androidDriver, item2.Inivalue[0]);
-                                break;
-                            case "swipeToDown":
-                                stop = TestTool.swipeToDown(androidDriver, item2.Inivalue[0]);
-                                break;
-                            case "swipeToLeft":
-                                stop = TestTool.swipeToDown(androidDriver, item2.Inivalue[0]);
-                                break;
-                            case "swipeToRight":
-                                stop = TestTool.swipeToDown(androidDriver, item2.Inivalue[0]);
-                                break;
-                            case "ThreadSleep":
-                                stop = TestTool.ThreadSleep(driver, item2.Inivalue[0]);
-                                break;
-                            case "TestRememberMe":
-                                driver = TestTool.TestRememberMe(driver, item2.Inivalue[0]);
-                                break;
-                            case "Table_GetTrRowNumerAndClickHref_ByXPath":
-                                stop = TestTool.Table_GetTrRowNumerAndClickHref_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2], item2.Inivalue[3], item2.Inivalue[4]);
-                                break;
-                            case "WebDriverWait_AssertAreEqual_Text_ById":
-                                if (TestDriver.ToLower() == "android")
-                                {
-                                    stop = TestTool.WebDriverWait_AssertAreEqual_Text_ById(androidDriver, item2.Inivalue[0], item2.Inivalue[1]);
-                                }
-                                else
-                                {
-                                    stop = TestTool.WebDriverWait_AssertAreEqual_Text_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                }
-                                break;
-                            case "WebDriverWait_Dropdown_SelectText_ByName":
-                                stop = TestTool.WebDriverWait_Dropdown_SelectText_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "WebDriverWait_Dropdown_SelectText_ById":
-                                stop = TestTool.WebDriverWait_Dropdown_SelectText_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
-                                break;
-                            case "TempTest":
-                                stop = TestTool.TempTest(driver, item2.Inivalue[0]);
-                                break;
-                            default:
-                                TestTool.writeLog("error", item2.IniName + "：不存在!!");
-                                break;
-                                #endregion
+                        stop = InvokeMethod(item2);
+                        //stop = SwitchMethod(stop, item2);
 
-                        }
                         Assert.IsTrue(stop);
                     }
-
+                    PassTotal += item.IniDetail.Count;
                     TestTool.writeLog("Trace", "----測試結束----" + item.IniType);
+                    TestTool.writeLog("Trace", string.Format(@"----PASS：{0}筆----" , item.IniDetail.Count));
                     TestTool.writeLog("Trace", "----------------------------------------------------------------------------------------");
 
                 }
+                TestTool.writeLog("Trace", string.Format(@"----總PASS：{0}筆----", PassTotal));
             }
             catch (Exception ex)
             {
@@ -372,6 +142,313 @@ namespace UnitTestProject1
                     Assert.IsFalse(true);
                 }
             }
+        }
+
+        private static bool InvokeMethod(Detail item2)
+        {
+            bool stop;
+            //預設設定
+            Type TestToolType = TestTool.GetType();
+            ConstructorInfo magicConstructor = TestToolType.GetConstructor(Type.EmptyTypes);
+            object magicClassObject = magicConstructor.Invoke(new object[] { });
+            //查詢方法名稱
+            MethodInfo magicMethod = TestToolType.GetMethods().Where(p => p.Name == item2.IniName && p.ToString().Contains("IWebDriver")).FirstOrDefault();
+            //取得方法有幾個Parameter
+            int parameters = magicMethod.GetParameters().Count();
+            //宣告組要執行的parameters字串
+            object[] arr = new object[parameters];
+            arr[0] = driver;
+            for (int i = 1; i < parameters; i++)
+            {
+                arr[i] = item2.Inivalue[i - 1];
+            }
+            //執行方法
+            stop = Convert.ToBoolean(magicMethod.Invoke(magicClassObject, arr));
+            return stop;
+        }
+
+
+        public static bool InvokeStringMethod(string methodName, object[] stringParam)
+        {
+            TestMethodList dd = new TestMethodList();
+            Type magicType = dd.GetType();
+            ConstructorInfo magicConstructor = magicType.GetConstructor(Type.EmptyTypes);
+            object magicClassObject = magicConstructor.Invoke(new object[] { });
+
+            //MethodInfo magicMethod = magicType.GetMethod(methodName);
+            MethodInfo magicMethod = magicType.GetMethods().Where(p =>p.Name==methodName && p.ToString().Contains("IWebDriver")).FirstOrDefault();
+            var MethodEnd = magicMethod.Invoke(magicClassObject,  stringParam );
+            return (bool)MethodEnd;
+        }
+
+        private static bool SwitchMethod(bool stop, Detail item2)
+        {
+            #region chrome
+            switch (item2.IniName)
+            {
+                case "AssertAreEqual_DriverTitle":
+                    stop = TestTool.AssertAreEqual_DriverTitle(driver, item2.Inivalue[0]);
+                    break;
+                case "AssertAreEqual_Text_ByXPath":
+                    if (TestDriver.ToLower() == "android")
+                    {
+                        stop = TestTool.AssertAreEqual_Text_ByXPath(androidDriver, item2.Inivalue[0], item2.Inivalue[1]);
+                    }
+                    else
+                    {
+                        stop = TestTool.AssertAreEqual_Text_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    }
+                    break;
+                case "AssertAreEqual_Text_ById":
+                    if (TestDriver.ToLower() == "android")
+                    {
+                        stop = TestTool.AssertAreEqual_Text_ById(androidDriver, item2.Inivalue[0], item2.Inivalue[1]);
+                    }
+                    else
+                    {
+                        stop = TestTool.AssertAreEqual_Text_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    }
+                    break;
+                case "AssertAreEqual_Text_ByName":
+                    stop = TestTool.AssertAreEqual_Text_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_Text_ByTagName":
+                    stop = TestTool.AssertAreEqual_Text_ByTagName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_Text_ByClassName":
+                    stop = TestTool.AssertAreEqual_Text_ByClassName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_Text_ByCssSelector":
+                    stop = TestTool.AssertAreEqual_Text_ByCssSelector(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_Text_ByXPath_TrimSpaceReplaceLine":
+                    stop = TestTool.AssertAreEqual_Text_ByXPath_TrimSpaceReplaceLine(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_Value_ByXPath":
+                    stop = TestTool.AssertAreEqual_Value_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_Value_ById":
+                    stop = TestTool.AssertAreEqual_Value_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_Value_ByName":
+                    stop = TestTool.AssertAreEqual_Value_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_Value_ByTagName":
+                    stop = TestTool.AssertAreEqual_Value_ByTagName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_Value_ByClassName":
+                    stop = TestTool.AssertAreEqual_Value_ByClassName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_GetCssColor_ByXPath":
+                    stop = TestTool.AssertAreEqual_GetCssColor_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2]);
+                    break;
+                case "AssertAreEqual_GetCssColor_ById":
+                    stop = TestTool.AssertAreEqual_GetCssColor_ById(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2]);
+                    break;
+                case "AssertAreEqual_GetCssColor_ByName":
+                    stop = TestTool.AssertAreEqual_GetCssColor_ByName(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2]);
+                    break;
+                case "AssertAreEqual_ElementExist_ByXPath":
+                    stop = TestTool.AssertAreEqual_ElementExist_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_ElementExist_ById":
+                    stop = TestTool.AssertAreEqual_ElementExist_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_ElementExist_ByName":
+                    stop = TestTool.AssertAreEqual_ElementExist_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_ElementExist_ByLinkText":
+                    stop = TestTool.AssertAreEqual_ElementExist_ByLinkText(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_SelectListValuet_ByClassName":
+                    stop = TestTool.AssertAreEqual_SelectListValuet_ByClassName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_DropdownSelectValue_ByXPath":
+                    stop = TestTool.AssertAreEqual_DropdownSelectValue_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_DropdownSelectValue_ById":
+                    stop = TestTool.AssertAreEqual_DropdownSelectValue_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_DropdownSelectValue_ByName":
+                    stop = TestTool.AssertAreEqual_DropdownSelectValue_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_DropdownCount_ById":
+                    stop = TestTool.AssertAreEqual_DropdownCount_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_DropdownCount_ByXPath":
+                    stop = TestTool.AssertAreEqual_DropdownCount_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_DropdownCount_ByName":
+                    stop = TestTool.AssertAreEqual_DropdownCount_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "AssertAreEqual_Android_messageToast_ByXPath":
+                    stop = TestTool.AssertAreEqual_Android_messageToast_ByXPath(androidDriver, item2.Inivalue[0]);
+                    break;
+                case "AssertIsTrue_Selected_ByXPath":
+                    stop = TestTool.AssertIsTrue_Selected_ByXPath(driver, item2.Inivalue[0]);
+                    break;
+                case "AssertIsTrue_DriverTitle":
+                    stop = TestTool.AssertIsTrue_DriverTitle(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "Action_ContextClick_ByXPath":
+                    stop = TestTool.Action_ContextClick_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "Action_MoveToElement_ByCssSelector":
+                    stop = TestTool.Action_MoveToElement_ByCssSelector(driver, item2.Inivalue[0]);
+                    break;
+                case "Alert_OKCancel":
+                    stop = TestTool.Alert_OKCancel(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "ClickFindElement_ById":
+                    if (TestDriver.ToLower() == "android")
+                    {
+                        stop = TestTool.ClickFindElement_ById(androidDriver, item2.Inivalue[0]);
+                    }
+                    else
+                    {
+                        stop = TestTool.ClickFindElement_ById(driver, item2.Inivalue[0]);
+                    }
+                    break;
+                case "ClickFindElement_ByName":
+                    stop = TestTool.ClickFindElement_ByName(driver, item2.Inivalue[0]);
+                    break;
+                case "ClickFindElement_ByXPath":
+                    stop = TestTool.ClickFindElement_ByXPath(driver, item2.Inivalue[0]);
+                    break;
+                case "ClickFindElement_ByLinkText":
+                    stop = TestTool.ClickFindElement_ByLinkText(driver, item2.Inivalue[0]);
+                    break;
+                case "ClickJSFindElement_ByXPath":
+                    stop = TestTool.ClickJSFindElement_ByXPath(driver, item2.Inivalue[0]);
+                    break;
+                case "ClearFindElement_ByXPath":
+                    stop = TestTool.ClearFindElement_ByXPath(driver, item2.Inivalue[0]);
+                    break;
+                case "ClearFindElement_ById":
+                    stop = TestTool.ClearFindElement_ById(driver, item2.Inivalue[0]);
+                    break;
+                case "ClearFindElement_ByName":
+                    stop = TestTool.ClearFindElement_ByName(driver, item2.Inivalue[0]);
+                    break;
+                case "Dropdown_SelectValue_ByXPath":
+                    stop = TestTool.Dropdown_SelectValue_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "Dropdown_SelectValue_ById":
+                    stop = TestTool.Dropdown_SelectValue_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "Dropdown_SelectValue_ByName":
+                    stop = TestTool.Dropdown_SelectValue_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "Dropdown_SelectText_ByXPath":
+                    stop = TestTool.Dropdown_SelectText_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "Dropdown_SelectText_ById":
+                    stop = TestTool.Dropdown_SelectText_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "Dropdown_SelectText_ByName":
+                    stop = TestTool.Dropdown_SelectText_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "Dropdown_SelectTextEveryoneInput_ByXPath":
+                    stop = TestTool.Dropdown_SelectTextEveryoneInput_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "Dropdown_SelectTextEveryoneInput_ById":
+                    stop = TestTool.Dropdown_SelectTextEveryoneInput_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "Dropdown_SelectTextEveryoneInput_ByName":
+                    stop = TestTool.Dropdown_SelectTextEveryoneInput_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "Driver_SwitchTo":
+                    stop = TestTool.Driver_SwitchTo(driver, item2.Inivalue[0]);
+                    break;
+                case "Driver_Quit":
+                    stop = TestTool.Driver_Quit(driver);
+                    break;
+                case "Driver_Close":
+                    stop = TestTool.Driver_Close(driver);
+                    break;
+                case "GoToUrl":
+                    stop = TestTool.GoToUrl(driver, item2.Inivalue[0]);
+                    break;
+                case "IJavaScriptExecutor_BrowserAddPaging":
+                    stop = TestTool.IJavaScriptExecutor_BrowserAddPaging(driver, item2.Inivalue[0]);
+                    break;
+                case "PullDownScroll_ByXPath":
+                    stop = TestTool.PullDownScroll_ByXPath(driver, item2.Inivalue[0]);
+                    break;
+                case "PullDownScroll_ByXPath_ClickNextPage":
+                    stop = TestTool.PullDownScroll_ByXPath_ClickNextPage(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2]);
+                    break;
+                case "PullRightScroll_ByXPath":
+                    stop = TestTool.PullRightScroll_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "PullLeftScroll_ByXPatht":
+                    stop = TestTool.PullLeftScroll_ByXPatht(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "SendKeys_ByXPath":
+                    stop = TestTool.SendKeys_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "SendKeys_ById":
+                    if (TestDriver.ToLower() == "android")
+                    {
+                        stop = TestTool.SendKeys_ById(androidDriver, item2.Inivalue[0], item2.Inivalue[1]);
+                    }
+                    else
+                    {
+                        stop = TestTool.SendKeys_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    }
+                    break;
+                case "SendKeys_ByName":
+                    stop = TestTool.SendKeys_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "SendKeys_SendWait":
+                    stop = TestTool.SendKeys_SendWait(driver, item2.Inivalue[0]);
+                    break;
+                case "swipeToUp":
+                    stop = TestTool.swipeToUp(androidDriver, item2.Inivalue[0]);
+                    break;
+                case "swipeToDown":
+                    stop = TestTool.swipeToDown(androidDriver, item2.Inivalue[0]);
+                    break;
+                case "swipeToLeft":
+                    stop = TestTool.swipeToDown(androidDriver, item2.Inivalue[0]);
+                    break;
+                case "swipeToRight":
+                    stop = TestTool.swipeToDown(androidDriver, item2.Inivalue[0]);
+                    break;
+                case "ThreadSleep":
+                    stop = TestTool.ThreadSleep(driver, item2.Inivalue[0]);
+                    break;
+                case "TestRememberMe":
+                    driver = TestTool.TestRememberMe(driver, item2.Inivalue[0]);
+                    break;
+                case "Table_GetTrRowNumerAndClickHref_ByXPath":
+                    stop = TestTool.Table_GetTrRowNumerAndClickHref_ByXPath(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2], item2.Inivalue[3], item2.Inivalue[4]);
+                    break;
+                case "WebDriverWait_AssertAreEqual_Text_ById":
+                    if (TestDriver.ToLower() == "android")
+                    {
+                        stop = TestTool.WebDriverWait_AssertAreEqual_Text_ById(androidDriver, item2.Inivalue[0], item2.Inivalue[1]);
+                    }
+                    else
+                    {
+                        stop = TestTool.WebDriverWait_AssertAreEqual_Text_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    }
+                    break;
+                case "WebDriverWait_Dropdown_SelectText_ByName":
+                    stop = TestTool.WebDriverWait_Dropdown_SelectText_ByName(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "WebDriverWait_Dropdown_SelectText_ById":
+                    stop = TestTool.WebDriverWait_Dropdown_SelectText_ById(driver, item2.Inivalue[0], item2.Inivalue[1]);
+                    break;
+                case "TempTest":
+                    stop = TestTool.TempTest(driver, item2.Inivalue[0], item2.Inivalue[1], item2.Inivalue[2]);
+                    break;
+                default:
+                    TestTool.writeLog("error", item2.IniName + "：不存在!!");
+                    break;
+            }
+            #endregion
+            return stop;
         }
     }
 

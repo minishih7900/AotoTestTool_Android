@@ -17,19 +17,30 @@ using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Appium.Android;
 using System.Windows.Forms;
-
+using System.Reflection;
 
 namespace ClassLibrary1
 {
     public class TestMethodList
     {
-        public bool TempTest(IWebDriver driver,string XPath)
+        
+        public bool TempTest(IWebDriver driver,string checkstring,string confirm,string inputstring)
         {
             try
             {
-                
-                Trace.WriteLine(driver.FindElement(By.XPath(XPath)).Displayed);
-                Assert.IsTrue(driver.FindElement(By.XPath(XPath)).Displayed);
+                IAlert alert = driver.SwitchTo().Alert();
+                string msg = alert.Text;
+                Assert.AreEqual(checkstring, msg);
+                Thread.Sleep(1000);
+                alert.SendKeys(inputstring);
+                if (confirm == "True")
+                {
+                    alert.Accept();
+                }
+                if (confirm == "Cancel")
+                {
+                    alert.Dismiss();
+                }
                 passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
                 return true;
             }
@@ -183,6 +194,55 @@ namespace ClassLibrary1
                 return false;
             }
         }
+        /// <summary>
+        /// 依元素CssSelector找到內容並與輸入的文字進行驗證
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="CssSelector"></param>
+        /// <param name="CheckString"></param>
+        /// <returns></returns>
+        public bool AssertAreEqual_Text_ByCssSelector(IWebDriver driver, string CssSelector, string CheckString)
+        {
+            try
+            {
+                Assert.AreEqual(CheckString, driver.FindElement(By.CssSelector(CssSelector)).Text);
+
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        /// <summary>
+        /// 依元素Xpath找到內容並與輸入的文字進行驗證，for 當text內容有其他文字與空白時，會過濾空白與換行
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="XPath"></param>
+        /// <param name="CheckString"></param>
+        /// <returns></returns>
+        public bool AssertAreEqual_Text_ByXPath_TrimSpaceReplaceLine(IWebDriver driver, string XPath, string CheckString)
+        {
+            try
+            {
+                IWebElement h1 = driver.FindElement(By.XPath(XPath));
+                string tempText = h1.Text.Trim().Replace("\r\n", "");
+                int index = tempText.IndexOf(CheckString);
+
+                Assert.AreEqual(CheckString, tempText.Substring(index, CheckString.Length));
+
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+
         //--------------------------------------------------------------------//
 
         //--------------------------------------------------------------------//
@@ -437,7 +497,7 @@ namespace ClassLibrary1
             }
         }
         /// <summary>
-        /// 判斷測試元素Name是否存在，可以自行輸入是要存在還是不存在。
+        /// 判斷測試元素LinkText是否存在，可以自行輸入是要存在還是不存在。
         /// </summary>
         /// <param name="driver"></param>
         /// <param name="Name"></param>
@@ -579,6 +639,75 @@ namespace ClassLibrary1
             }
 
         }
+        /// <summary>
+        /// 依ID名稱檢查select option有幾筆
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="Id"></param>
+        /// <param name="OptionsCount"></param>
+        /// <returns></returns>
+        public bool AssertAreEqual_DropdownCount_ById(IWebDriver driver, string Id, string OptionsCount)
+        {
+            try
+            {
+                IWebElement selectElem = driver.FindElement(By.Id(Id));
+                IList<IWebElement> options = selectElem.FindElements(By.TagName("option"));
+                Assert.AreEqual(Convert.ToInt32(OptionsCount), options.Count());
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        /// <summary>
+        /// 依XPath檢查select option有幾筆
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="Id"></param>
+        /// <param name="OptionsCount"></param>
+        /// <returns></returns>
+        public bool AssertAreEqual_DropdownCount_ByXPath(IWebDriver driver, string XPath, string OptionsCount)
+        {
+            try
+            {
+                IWebElement selectElem = driver.FindElement(By.XPath(XPath));
+                IList<IWebElement> options = selectElem.FindElements(By.TagName("option"));
+                Assert.AreEqual(Convert.ToInt32(OptionsCount), options.Count());
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        /// <summary>
+        /// 依XPath檢查select option有幾筆
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="Id"></param>
+        /// <param name="OptionsCount"></param>
+        /// <returns></returns>
+        public bool AssertAreEqual_DropdownCount_ByName(IWebDriver driver, string Name, string OptionsCount)
+        {
+            try
+            {
+                IWebElement selectElem = driver.FindElement(By.Name(Name));
+                IList<IWebElement> options = selectElem.FindElements(By.TagName("option"));
+                Assert.AreEqual(Convert.ToInt32(OptionsCount), options.Count());
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
 
         //--------------------------------------------------------------------//
         /// <summary>
@@ -587,7 +716,7 @@ namespace ClassLibrary1
         /// <param name="driver"></param>
         /// <param name="XPath"></param>
         /// <returns></returns>
-         public bool AssertIsTrue_Selected_ByXPath(IWebDriver driver,string XPath)
+        public bool AssertIsTrue_Selected_ByXPath(IWebDriver driver,string XPath)
         {
             try
             {
@@ -680,8 +809,96 @@ namespace ClassLibrary1
                 return false;
             }
         }
+        /// <summary>
+        /// 滑鼠移動動作-指定元素，使滑鼠移動到指定元素上
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="CssSelector"></param>
+        /// <returns></returns>
+        public bool Action_MoveToElement_ByCssSelector(IWebDriver driver, string CssSelector)
+        {
+            try
+            {
+                Actions actionsObj = new Actions(driver);
+                actionsObj.MoveToElement(driver.FindElement(By.CssSelector(CssSelector)));
+                actionsObj.Perform();
 
-
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        //--------------------------------------------------------------------//
+        /// <summary>
+        /// Alert視窗，確認視窗內容與可選擇按下確定或取消鍵
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="checkstring">要確定的訊息內容</param>
+        /// <param name="confirm">選擇確定或取消</param>
+        /// <returns></returns>
+        public bool Alert_OKCancel(IWebDriver driver, string checkstring, string confirm)
+        {
+            try
+            {
+                IAlert alert = driver.SwitchTo().Alert();
+                string msg = alert.Text;
+                Assert.AreEqual(checkstring, msg);
+                Thread.Sleep(1000);
+                if (confirm == "True")
+                {
+                    alert.Accept();
+                }
+                if (confirm == "Cancel")
+                {
+                    alert.Dismiss();
+                }
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        /// <summary>
+        /// Alert視窗，確認視窗內容與可輸入內容，並可選擇按下確定或取消鍵
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="checkstring">要確定的訊息內容</param>
+        /// <param name="confirm">選擇確定或取消</param>
+        /// <param name="inputstring">要輸入的內容</param>
+        /// <returns></returns>
+        public bool Alert_prompt(IWebDriver driver, string checkstring, string confirm, string inputstring)
+        {
+            try
+            {
+                IAlert alert = driver.SwitchTo().Alert();
+                string msg = alert.Text;
+                Assert.AreEqual(checkstring, msg);
+                Thread.Sleep(1000);
+                alert.SendKeys(inputstring);
+                if (confirm == "True")
+                {
+                    alert.Accept();
+                }
+                if (confirm == "Cancel")
+                {
+                    alert.Dismiss();
+                }
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
 
         #endregion
 
@@ -1255,7 +1472,7 @@ namespace ClassLibrary1
 
         #region P
         /// <summary>
-        /// 找到元素XPath再使用捲軸拖拉過去
+        /// 找到元素XPath再使用捲軸拖往下拉過去
         /// </summary>
         /// <param name="driver"></param>
         /// <param name="XPath"></param>
@@ -1315,7 +1532,51 @@ namespace ClassLibrary1
                 return false;
             }
         }
+        /// <summary>
+        /// 找到元素XPath再使用捲軸往右拖拉過去
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="XPath"></param>
+        /// <returns></returns>
+        public bool PullRightScroll_ByXPath(IWebDriver driver, string XPath, string SetWidth)
+        {
+            try
+            {
+                IWebElement eles = driver.FindElement(By.XPath(XPath));
+                ((IJavaScriptExecutor)driver).ExecuteScript(string.Format(@"arguments[0].scrollLeft +={0}", SetWidth), eles);
 
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        /// <summary>
+        /// 找到元素XPath再使用捲軸往左拖拉過去
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="XPath"></param>
+        /// <param name="SetWidth"></param>
+        /// <returns></returns>
+        public bool PullLeftScroll_ByXPatht(IWebDriver driver, string XPath, string SetWidth)
+        {
+            try
+            {
+                IWebElement eles = driver.FindElement(By.XPath(XPath));
+                ((IJavaScriptExecutor)driver).ExecuteScript(string.Format(@"arguments[0].scrollLeft -={0}", SetWidth), eles);
+
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
         #endregion
 
         #region S
@@ -1586,7 +1847,7 @@ namespace ClassLibrary1
                     IList<IWebElement> rows = simpleTable.FindElements(By.TagName("tr"));
                     IWebElement tr = rows.FirstOrDefault(p => p.Text.Contains(QueryString));
                     int trIndex = rows.IndexOf(tr);
-                    string NewXpath = XPath + "/tbody/tr[" + trIndex + "]//*/a[" + ALinkNum + "]";
+                    string NewXpath = XPath + "/tbody/tr[" + trIndex + "]//*/a" + ALinkNum + "";
                     driver.FindElement(By.XPath(NewXpath)).Click();
                 }
                 else
@@ -1900,8 +2161,8 @@ namespace ClassLibrary1
                 tempDate = driver.FindElement(By.XPath(CheckPageBody)).Text;
                 //點擊下一頁
                 driver.FindElement(By.XPath(ClickNextXPath)).Click();
-
-                if (tempDate != driver.FindElement(By.XPath(CheckPageBody)).Text)
+                
+                if (tempDate == driver.FindElement(By.XPath(CheckPageBody)).Text)
                 {
                     LogMessage = "Message：無符合的文字!!!";
                     break;
@@ -1909,5 +2170,10 @@ namespace ClassLibrary1
             }
         }
         #endregion
+
+        public bool funtest1()
+        {
+            return false;
+        }
     }
 }
