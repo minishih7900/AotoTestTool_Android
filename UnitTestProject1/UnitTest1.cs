@@ -30,7 +30,7 @@ namespace UnitTestProject1
         public static void InitializeClass()
         {
             TestDriver = readIni("DefaultSet", "Driver");
-            if (TestDriver.ToLower() == "android")
+            if (TestDriver == "AndroidDriver")
             {
                 Dcap = new DesiredCapabilities();
                 Dcap.SetCapability("platformName", readIni("AndroidSet", "platformName")); //手機系統
@@ -152,12 +152,19 @@ namespace UnitTestProject1
             ConstructorInfo magicConstructor = TestToolType.GetConstructor(Type.EmptyTypes);
             object magicClassObject = magicConstructor.Invoke(new object[] { });
             //查詢方法名稱
-            MethodInfo magicMethod = TestToolType.GetMethods().Where(p => p.Name == item2.IniName && p.ToString().Contains("IWebDriver")).FirstOrDefault();
+            MethodInfo magicMethod = TestToolType.GetMethods().Where(p => p.Name == item2.IniName && p.ToString().Contains(TestDriver)).FirstOrDefault();
             //取得方法有幾個Parameter
             int parameters = magicMethod.GetParameters().Count();
             //宣告組要執行的parameters字串
             object[] arr = new object[parameters];
-            arr[0] = driver;
+            if (TestDriver == "AndroidDriver")
+            {
+                arr[0] = androidDriver;
+            }
+            else
+            {
+                arr[0] = driver;
+            }
             for (int i = 1; i < parameters; i++)
             {
                 arr[i] = item2.Inivalue[i - 1];

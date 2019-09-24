@@ -1678,7 +1678,20 @@ namespace ClassLibrary1
                 return false;
             }
         }
-
+        public bool SendKeys_SendWait(AndroidDriver<AndroidElement> driver, string SendKeysData)
+        {
+            try
+            {
+                SendKeys.SendWait(SendKeysData);
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
         /// <summary>
         /// 上滑
         /// </summary>
@@ -1785,6 +1798,26 @@ namespace ClassLibrary1
         /// <param name="Time"></param>
         /// <returns></returns>
         public bool ThreadSleep(IWebDriver driver, string Time)
+        {
+            try
+            {
+                Thread.Sleep(Convert.ToInt16(Time));
+                passMessage(System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage(ex, System.Reflection.MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        /// <summary>
+        /// 等待時間-for android
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="Time"></param>
+        /// <returns></returns>
+        public bool ThreadSleep(AndroidDriver<AndroidElement> driver, string Time)
         {
             try
             {
