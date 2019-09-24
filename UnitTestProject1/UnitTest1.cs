@@ -177,6 +177,7 @@ namespace UnitTestProject1
 
         public static bool InvokeStringMethod(string methodName, object[] stringParam)
         {
+            
             TestMethodList dd = new TestMethodList();
             Type magicType = dd.GetType();
             ConstructorInfo magicConstructor = magicType.GetConstructor(Type.EmptyTypes);
