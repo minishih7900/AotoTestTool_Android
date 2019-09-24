@@ -29,7 +29,8 @@ namespace UnitTestProject1
         //ClassTEST執行前必執行程序
         public static void InitializeClass()
         {
-            //test
+            //test20190924
+
             TestDriver = readIni("DefaultSet", "Driver");
             if (TestDriver == "AndroidDriver")
             {
